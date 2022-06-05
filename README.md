@@ -1,6 +1,27 @@
 # office-viz
 Processing and visualization around The Office scripts, using tidy tuesday and schrute library for episode metadata
 
+# Data Dictionary
+### `schrute::theoffice`
+
+|variable              |class     |description |
+|:---|:---|:-----------|
+|season               |int | Series season (1-9) |
+|episode           |int | Episode identifier within each season |
+|character | character | Office character(s) speaking each line of text |
+|text                |character    | speaking line text |
+|writer               |character | Writer from each episode; an episode can have multiple writers |
+
+
+### `Fields added or inferred`
+
+
+|variable              |class     |description |
+|:---|:---|:-----------|
+|clean_speaker  |character | Each character associated with each speaking line, cleaned to handle typos and multiple speakers |
+|id              |character | Unique line identifiers |
+|Sentiment           |character | Amazon Comprehend-assigned sentiment associated with each line (POSITIVE | NEGATIVE | NEUTRAL) |
+
 # Sentiment Analysis!
 I ran the shrute library script text through Amazon Comprehend -- this gives each line both a classifier (Positive, Neutral, or Negative) and a quantitative score to represent the strength of that sentiment, for each line. If we look at the ratio of total positive lines to negative lines, we can get a look into who the most positive or negative characters are!
 
