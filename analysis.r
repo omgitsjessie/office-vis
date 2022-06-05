@@ -229,12 +229,53 @@ plot_writers_common_words
       }
 
 #Commenting out this section, proceed just by grabbing the generated CSV file
-    # This saves function output after nabbing the 55k calls to comprehend
-    # grab sentiment for all of the text fields in the original slack file
-    full_output <- get_sentiment(script_lines)
+    # # This saves function output after nabbing the 55k calls to comprehend
+    # # grab sentiment for all of the text fields in the original slack file
+    #   
+    # # This takes about 2 hours for the 55k calls, get comfortable
+    # full_output <- get_sentiment(script_lines)
+    # 
+    # # write user data to a csv to be read back in as df, if needed. Save $16.
+    # text_lines_sentiment <- full_output %>%
+    #   select(-text)
+    # text_lines_sentiment %>%
+    #   write.csv(file = 'office_export_sentiment_scores.csv')
 
-    # write user data to a csv to be read back in as df, if needed. Save $16.
-    text_lines_sentiment <- full_output %>%
-      select(-line_text) %>%
-      write.csv(file = 'office_export_sentiment_scores.csv')
+    
+  # Merge sentiment data back into script lines / writer / character dfs
+    script_sentiment <- read.csv("~/R Projects/office-viz/office_export_sentiment_scores.csv") %>%
+      select(-X)
+    
+    script_lines_sentiment <- script_sentiment %>%
+      merge(script_lines, all = TRUE)
+    
+    #Which of characters are most positive or negative?
+     character_sentiment_pct <- script_lines_sentiment %>%
+       filter(!clean_speaker == "",
+              !is.na(Sentiment)) %>%
+       group_by(clean_speaker) %>%
+       summarize(total_lines = n(),
+                 positive_lines = sum(Sentiment == "POSITIVE"),
+                 neutral_lines = sum(Sentiment == "NEUTRAL"),
+                 negative_lines = sum(Sentiment == "NEGATIVE"),
+                 perc_positive = positive_lines / total_lines,
+                 perc_negative = negative_lines / total_lines,
+                 perc_neutral = neutral_lines / total_lines,
+                 sentiment_ratio = positive_lines / negative_lines) %>%
+       arrange(desc(total_lines))
 
+    plot_sentiment_ratio <- 
+      character_sentiment_pct %>%
+      mutate(clean_speaker = fct_reorder(clean_speaker, sentiment_ratio)) %>%
+      filter(total_lines > 500) %>%
+      ggplot(aes(sentiment_ratio, clean_speaker)) + 
+      geom_errorbarh(aes(xmin = 1, xmax = sentiment_ratio), height = 0) + 
+      geom_point(aes(size = total_lines, color = sentiment_ratio > 1)) + 
+      scale_color_discrete(guide = 'none') + 
+      geom_vline(xintercept = 1, linetype = 'dashed') +
+      labs(title = "Which characters are the most positive?",
+           x = "Positive Lines / Negative Lines",
+           y = "",
+           size = "Total # of lines")
+    
+    plot_sentiment_ratio
