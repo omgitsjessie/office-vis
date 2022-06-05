@@ -137,13 +137,16 @@ plot_writers_common_chars <- writer_char_logodds %>%
   group_by(writer) %>%
   slice_max(log_odds_weighted, n=10) %>%
   mutate(clean_speaker = reorder_within(clean_speaker, log_odds_weighted, writer)) %>%
-  ggplot(aes(log_odds_weighted, clean_speaker)) + 
+  ggplot(aes(log_odds_weighted, clean_speaker, fill = writer)) + 
   geom_col() + 
   facet_wrap(~writer, scales = "free_y") + 
   scale_y_reordered() + 
   labs(title = "Character line representation, by writer",
        x = "log odds (weighted) of character lines by each writer",
-       y = "")
+       y = "") + 
+  theme_bw() + 
+  theme(legend.position = "none")
+
 
 # No -- looks like our writers don't write themselves a lot of lines!
 plot_writers_common_chars
@@ -180,15 +183,16 @@ plot_writers_common_words <- writer_logodds %>%
   group_by(writer) %>%
   slice_max(log_odds_weighted, n=10) %>%
   mutate(word = reorder_within(word, log_odds_weighted, writer)) %>%
-  ggplot(aes(log_odds_weighted, word)) + 
+  ggplot(aes(log_odds_weighted, word, fill = writer)) + 
   geom_col() + 
   facet_wrap(~ writer, scales = "free_y") + 
   scale_y_reordered() + 
   labs(title = "Most common words, by actor/writers in The Office",
        x = "log odds (weighted) of each writer's words",
-       y = "")
+       y = "") + 
+  theme_bw() + 
+  theme(legend.position = "none")
 
-#TODO - add color here, this is boring
 plot_writers_common_words
 
 # Text Sentiment via Amazon Comprehend

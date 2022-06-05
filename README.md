@@ -11,12 +11,12 @@ Interesting to note here -- all of the show's couples fall on the same side of t
 # What happens when writers write their own characters? 
 This show has four writers who also have smaller parts in the show. I was wondering if they had a tendency to write more or fewer lines for their own characters -- to investigate this, I looked at the log odds of the number of lines written for the different characters across all of the episodes that they wrote.
 
-<placeholder -- get char line representation plot>
+![](images/writer_character_line_odds.png)
 
 The interesting thing here is that the characters played by each writer are NOT highly-represented here! They aren't writing their own characters more lines. There could be a lot going on here -- one theory is that the writers were pulled in to act more for episodes written by OTHER writers? With 40+ writers involved across the entire series, it's possible!
 
 # Do writers tackle specific or different topics? 
 Looking at the set of words that each writer used, we can use log odds here as well to identify words that are more commonly-associated with each writer! Normal stop words were removed, along with character names, and a few office-specific filler words ("yeah", "uh", "hey", or "hum"). Since there are so many writers, focusing again here on the 4 writers who also appear as characters in the show.
 
-<placeholder -- get common words by actor/writers plot>
+![](images/writer_common_words.png)
 
