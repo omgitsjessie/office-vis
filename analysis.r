@@ -187,6 +187,8 @@ plot_writers_common_words <- writer_logodds %>%
   labs(title = "Most common words, by actor/writers in The Office",
        x = "log odds (weighted) of each writer's words",
        y = "")
+
+#TODO - add color here, this is boring
 plot_writers_common_words
 
 # Text Sentiment via Amazon Comprehend
@@ -276,6 +278,7 @@ plot_writers_common_words
       labs(title = "Which characters are the most positive?",
            x = "Positive Lines / Negative Lines",
            y = "",
-           size = "Total # of lines")
+           size = "Total # of lines") + 
+      theme_bw()
     
     plot_sentiment_ratio
