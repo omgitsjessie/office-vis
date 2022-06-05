@@ -4,13 +4,15 @@ library(gridExtra) # plot grid handling
 library(schrute) # all dialog from show, and metadata
 library(tidylo) # log odds calcs
 library(tidytext) # text handling, reorder within facets
+library(aws.comprehend) # sentiment analysis
 
 
-# load office script data
+# load office script data, and an id col
 script_lines <- schrute::theoffice %>% 
   as.data.frame() %>% 
-  select(season, episode, character, text, text_w_direction)
-  
+  select(season, episode, character, text, text_w_direction) %>%
+  mutate(id = row_number())
+
 episode_metadata <- schrute::theoffice %>% 
   as.data.frame() %>% 
   select(season, episode, episode_name, director, writer, imdb_rating) %>%
@@ -187,4 +189,52 @@ plot_writers_common_words <- writer_logodds %>%
        y = "")
 plot_writers_common_words
 
-# TODO -- text sentiment -- when aws free monthly rolls back over run through comprehend
+# Text Sentiment via Amazon Comprehend
+
+      # Function passes script lines to amazon comprehend to get sentiment analysis data
+      
+      # set up credentials 
+      jess_secrets <- read.csv("~/R Projects/office-viz/jess-comprehend-user_accessKeys.csv")
+      AWS_ACCESS_KEY_ID <- jess_secrets[1,'Access.key.ID']
+      AWS_SECRET_ACCESS_KEY <- jess_secrets[1,'Secret.access.key']
+      
+      Sys.setenv('AWS_ACCESS_KEY_ID' = AWS_ACCESS_KEY_ID,
+                 'AWS_SECRET_ACCESS_KEY' = AWS_SECRET_ACCESS_KEY,
+                 'AWS_DEFAULT_REGION' = "us-west-2")
+      
+      #Function, detect sentiment for a single-dimension list of text inputs
+      get_sentiment <- function(df) {
+        # initialize sentiment df
+        sentiment_df <- setNames(data.frame(matrix(ncol = 7, nrow = 0)), 
+                                 c("id", "text", "Sentiment", "Mixed",
+                                   "Negative", "Neutral", "Positive"))
+        
+        for (message in 1:nrow(df)) { 
+          #get the full sentiment response for each row
+          message_sentiment <- try(detect_sentiment(df[message,"text"] %>% as.character()))
+          
+          #pack those vars back into the bigger list
+          sentiment_df[message, "id"] <- df[message, "id"]
+          sentiment_df[message, "text"] <- df[message, "text"]
+          sentiment_df[message, "Sentiment"] <- message_sentiment[2]
+          sentiment_df[message, "Mixed"] <- message_sentiment[3]
+          sentiment_df[message, "Negative"] <- message_sentiment[4]
+          sentiment_df[message, "Neutral"] <- message_sentiment[5]
+          sentiment_df[message, "Positive"] <- message_sentiment[6]
+          
+          print(message) # I used this to find if there's any messages that were failing that needed to be removed
+        }
+        output = sentiment_df
+        
+      }
+
+#Commenting out this section, proceed just by grabbing the generated CSV file
+    # This saves function output after nabbing the 55k calls to comprehend
+    # grab sentiment for all of the text fields in the original slack file
+    full_output <- get_sentiment(script_lines)
+
+    # write user data to a csv to be read back in as df, if needed. Save $16.
+    text_lines_sentiment <- full_output %>%
+      select(-line_text) %>%
+      write.csv(file = 'office_export_sentiment_scores.csv')
+
